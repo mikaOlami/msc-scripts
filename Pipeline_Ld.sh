@@ -13,7 +13,7 @@ min_coverage=$3;   # minimun coverage for detection of transcripts
 max_gap=$4;        # maximun gap in coverage for detection of transcripts
 
 genome=$(basename "$transcripts" .bed);
-bed_file="/home/ls/mikao/LD/Annot_Ld1S/LD_annots.copies.bed";
+bed_file="~/LD/Annot_Ld1S/LD_annots.copies.bed";
 
 display_usage() { 
   echo -e "\n~~~ Calculate L.donovani transcripts from both directions ~~~";
