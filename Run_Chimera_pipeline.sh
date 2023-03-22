@@ -44,8 +44,8 @@ Lib_R2=$(echo $Lib_R1 | sed 's/R1/R2/g');               # R2 fastq file
 flash_output=$(basename $Lib_R1 | sed -E 's/R1.*gz$/flash.out/g');  # flash output file names
 val1=$(basename $Lib_R1 | sed -E 's/\.fastq.gz$/_val_1.fq.gz/g');   # trim galore R1 file name
 val2=$(basename $Lib_R1 | sed -E 's/R1.*gz$/R2_val_2.fq.gz/g');     # trim galore R2 file name
-SL_db="/home/ls/mikao/LD_Chimera_Libs/Sequencing_19Oct2021/SL_DB.out";         # SL DB file
-SL_rev_db="/home/ls/mikao/LD_Chimera_Libs/Sequencing_19Oct2021/SL_rev_DB.out"  # reverse complement SL DB file
+SL_db="~/LD_Chimera_Libs/Sequencing_19Oct2021/SL_DB.out";         # SL DB file
+SL_rev_db="~/LD_Chimera_Libs/Sequencing_19Oct2021/SL_rev_DB.out"  # reverse complement SL DB file
 declare -i align_length=5;  # cutadapt parameter: Require MINLENGTH overlap between read and adapter for an adapter to be found
 
 #######################
