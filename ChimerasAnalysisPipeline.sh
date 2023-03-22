@@ -25,7 +25,7 @@ display_usage() {
 	fi 
 
 chimeras_file=$1;  # chimeras file
-if [ -z "$2" ]; then annots_bed="/home/ls/mikao/LD/Annot_Ld1S/LD_annots.copies.bed"; else annots_bed=$(realpath $2); fi;  # optional annotations bedfile
+if [ -z "$2" ]; then annots_bed="~/Annot_Ld1S/LD_annots.copies.bed"; else annots_bed=$(realpath $2); fi;  # optional annotations bedfile
 
 # output file names
 links_out=$(basename $chimeras_file .out)_links_genes.out;
