@@ -78,17 +78,17 @@ cutadapt -g file:$SL_db -a file:$SL_rev_db -O $align_length -m 15 -o "$base"trim
 
 echo -e "fastp - trim polyA ...\n";
 
-/private/bin/fastp -x -i "$base"trimmed_merged.fastq -o "$base"trimmed_merged_fastp.fastq;
+fastp -x -i "$base"trimmed_merged.fastq -o "$base"trimmed_merged_fastp.fastq;
 
-/private/bin/fastp -x -i "$base"trimmed_notCombined_1.fastq -I "$base"trimmed_notCombined_2.fastq -o "$base"trimmed_notCombined_1_fastp.fastq -O "$base"trimmed_notCombined_2_fastp.fastq;
+fastp -x -i "$base"trimmed_notCombined_1.fastq -I "$base"trimmed_notCombined_2.fastq -o "$base"trimmed_notCombined_1_fastp.fastq -O "$base"trimmed_notCombined_2_fastp.fastq;
 
 # trim polyA and polyT tails with prinseq
 
 echo -e "prinseq - trim polyA and polyT tails ...\n";
 
-perl /home/private/packages/prinseq-lite-0.20.4/prinseq-lite.pl -fastq "$base"trimmed_merged_fastp.fastq -trim_tail_left 10 -trim_tail_right 10 -out_good "$base"trimmed_merged_prinseq -out_bad null -lc_method entropy -lc_threshold 60 -min_len 40 >> "$base"prinseq.log &
+perl prinseq-lite.pl -fastq "$base"trimmed_merged_fastp.fastq -trim_tail_left 10 -trim_tail_right 10 -out_good "$base"trimmed_merged_prinseq -out_bad null -lc_method entropy -lc_threshold 60 -min_len 40 >> "$base"prinseq.log &
 
-perl /home/private/packages/prinseq-lite-0.20.4/prinseq-lite.pl -trim_tail_left 10 -trim_tail_right 10 -out_good "$base"trimmed_notCombined_prinseq -out_bad null -lc_method entropy -lc_threshold 60 -min_len 40 -fastq "$base"trimmed_notCombined_1_fastp.fastq -fastq2 "$base"trimmed_notCombined_2_fastp.fastq >> "$base"prinseq.log &
+perl prinseq-lite.pl -trim_tail_left 10 -trim_tail_right 10 -out_good "$base"trimmed_notCombined_prinseq -out_bad null -lc_method entropy -lc_threshold 60 -min_len 40 -fastq "$base"trimmed_notCombined_1_fastp.fastq -fastq2 "$base"trimmed_notCombined_2_fastp.fastq >> "$base"prinseq.log &
 
 wait;
 
@@ -106,31 +106,31 @@ python3 ~/scripts/FastqFilterHomopolymers.py "$base"trimmed_merged_prinseq.fastq
 
 echo -e "repairing paired-end reads ...\n";
 
-/private/packages/bbmap/repair.sh in1="$base"trimmed_notCombined_1_homopolymers.fastq~ in2="$base"trimmed_notCombined_2_homopolymers.fastq~ out1="$base"trimmed_notCombined_1_homopolymers.fastq out2="$base"trimmed_notCombined_2_homopolymers.fastq 2> "$base"repairPE.log;
+bbmap/repair.sh in1="$base"trimmed_notCombined_1_homopolymers.fastq~ in2="$base"trimmed_notCombined_2_homopolymers.fastq~ out1="$base"trimmed_notCombined_1_homopolymers.fastq out2="$base"trimmed_notCombined_2_homopolymers.fastq 2> "$base"repairPE.log;
 
 # align reads to genome with bwa
 
 echo "bwa - R1 not merged ...";
 echo "";
 
-nohup bwa aln -t 4 -f "$base"aln_sa1.sai /home/ls/mikao/LD/LD_bwa_index "$base"trimmed_notCombined_1_homopolymers.fastq &
+nohup bwa aln -t 4 -f "$base"aln_sa1.sai ~/LD/LD_bwa_index "$base"trimmed_notCombined_1_homopolymers.fastq &
 
 echo "bwa - R2 not merged ...";
 echo "";
 
-nohup bwa aln -t 4 -f "$base"aln_sa2.sai /home/ls/mikao/LD/LD_bwa_index "$base"trimmed_notCombined_2_homopolymers.fastq &
+nohup bwa aln -t 4 -f "$base"aln_sa2.sai ~/LD/LD_bwa_index "$base"trimmed_notCombined_2_homopolymers.fastq &
 
 echo "bwa - R1+R2 merged ...";
 echo "";
 
-nohup bwa-mem2 mem -t 4 /home/ls/mikao/LD/LD_bwa_mem_index "$base"trimmed_merged_homopolymers.fastq > "$base"merged_bwa_mem.sam 2> "$base"merged_bwa.log &
+nohup bwa-mem2 mem -t 4 ~/LD/LD_bwa_mem_index "$base"trimmed_merged_homopolymers.fastq > "$base"merged_bwa_mem.sam 2> "$base"merged_bwa.log &
 
 wait;
 
 echo "bwa sampe - pairing unmerged R1/R2 reads ...";
 echo "";
 
-bwa sampe -f "$base"bwa_mem_vs_LD_Genome.sam /home/ls/mikao/LD/LD_bwa_index "$base"aln_sa1.sai "$base"aln_sa2.sai "$base"trimmed_notCombined_1_homopolymers.fastq "$base"trimmed_notCombined_2_homopolymers.fastq 2> "$base"sampe_trimmed_polyA.log;
+bwa sampe -f "$base"bwa_mem_vs_LD_Genome.sam ~/LD/LD_bwa_index "$base"aln_sa1.sai "$base"aln_sa2.sai "$base"trimmed_notCombined_1_homopolymers.fastq "$base"trimmed_notCombined_2_homopolymers.fastq 2> "$base"sampe_trimmed_polyA.log;
 
 # convert to bam with samtools ##################
 
@@ -161,7 +161,7 @@ samtools index "$base"bwa_mem_vs_LD_Genome_filtered_sorted.bam;
 echo "splash - find chimeras on merged file ...";
 echo "";
 
-/private/packages/anaconda3/envs/py2/bin/python /private/packages/splash-master/src/find_chimeras.py -i "$base"merged_bwa_mem_filtered_sorted.bam --min-chim-dist 40 > "$base"merged_chimeras.out;
+python splash-master/src/find_chimeras.py -i "$base"merged_bwa_mem_filtered_sorted.bam --min-chim-dist 40 > "$base"merged_chimeras.out;
 
 # sort bam files by read names with samtools
 
